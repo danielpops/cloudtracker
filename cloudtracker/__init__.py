@@ -248,13 +248,13 @@ def get_role_allowed_actions(aws_api_list, role_iam, account_iam):
     """Return the privileges granted to a role by IAM"""
     privileges = Privileges(aws_api_list)
 
-    # Get privileges from managed policies
+    # Get privileges from managed policies attached to the role
     for managed_policy in role_iam['AttachedManagedPolicies']:
         policy = pyjq.one('.Policies[] | select(.Arn == "{}") | .PolicyVersionList[] | select(.IsDefaultVersion == true) | .Document'.format(managed_policy['PolicyArn']), account_iam)
         for stmt in make_list(policy['Statement']):
             privileges.add_stmt(stmt)
 
-    # Get privileges from attached policies
+    # Get privileges from in-line policies attached to the role
     for policy in role_iam['RolePolicyList']:
         for stmt in make_list(policy['PolicyDocument']['Statement']):
             privileges.add_stmt(stmt)
