@@ -32,10 +32,8 @@ ${DEV_TARGETS}: dev_elasticsearchv%: requirements_es%
 
 .PHONY: clean
 clean:
-	# Delete the virtual environment
-	@rm -rf ./venv
-	# Get rid of any generated requirements.txt files
-	@rm ./requirements*es*.txt
+	@rm -rf ./venv 2> /dev/null || true
+	@rm ./requirements*es*.txt 2> /dev/null || true
 
 help:
 	@printf "\033[36m%-20s\033[0m %s\n" "dev_elasticsearchv1" "Configures the environment for es v1"
