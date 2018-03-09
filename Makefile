@@ -1,4 +1,4 @@
-SHELL := /bin/bash
+.DEFAULT_GOAL := help
 
 SUPPORTED_VERSIONS=1 6
 DEV_TARGETS = $(addprefix dev_elasticsearchv,${SUPPORTED_VERSIONS})
@@ -35,4 +35,9 @@ clean:
 	# Delete the virtual environment
 	@rm -rf ./venv
 	# Get rid of any generated requirements.txt files
-	@ls -1 | grep -P "requirements(-)?(dev)?\.es\d\.txt" | xargs
+	@rm ./requirements*es*.txt
+
+help:
+	@printf "\033[36m%-20s\033[0m %s\n" "dev_elasticsearchv1" "Configures the environment for es v1"
+	@printf "\033[36m%-20s\033[0m %s\n" "dev_elasticsearchv6" "Configures the environment for es v6"
+	@printf "\033[36m%-20s\033[0m %s\n" "clean" "Clean build artifacts"

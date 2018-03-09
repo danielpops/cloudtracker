@@ -2,19 +2,32 @@ CloudTracker helps you find over-privileged IAM users and roles by comparing Clo
 
 *Intro post: https://duo.com/blog/introducing-cloudtracker-an-aws-cloudtrail-log-analyzer*
 
+Requirements
+============
+* CloudTrail logs must be loaded into ElasticSearch.  For instructions on setting up ElasticSearch and ingesting an archive of CloudTrail logs into it see [ElasticSearch installation and ingestion](docs/elasticsearch.md).
+  * ElasticSearch 6.x is supported, but there are reports of ElasticSearch 1.x being used successfully.
+  * More datasources are planned for the future, specifically using Athena to query an S3 bucket directly that contains CloudTrail logs.
+
+
+
 Installation
 ============
-CloudTracker requires you to have loaded CloudTrail logs into ElasticSearch.  For instructions on setting up ElasticSearch and ingesting an archive of CloudTrail logs into it see [ElasticSearch installation and ingestion](docs/elasticsearch.md)
 
 ### Step 1
-Install the Python libraries:
+Install the Python libraries using one of the provided Makefile targets:
+
+For elasticsearch v6.x:
 ```
-git clone https://github.com/duo-labs/cloudtracker.git
-cd cloudtracker
-virtualenv venv
+make dev_elasticsearchv6
 source venv/bin/activate
-pip install -r requirements.txt
 ```
+
+For older versions, such as elasticsearch v1.x:
+```
+make dev_elasticsearchv1
+source venv/bin/activate
+```
+The target will create a virtualenv in `./venv` and pip install the relevant requirements.
 
 ### Step 2
 Get the IAM data of the account
@@ -49,10 +62,10 @@ Additionally, you can configure:
 
 
 Example usage
-=======
+=============
 
 Listing actors
--------
+--------------
 CloudTracker provides command line options to list the users and roles in an account. For example:
 ```
 $ python cloudtracker.py --account demo --list users --start 2018-01-01
@@ -73,7 +86,7 @@ $ python cloudtracker.py --account demo --list roles --start 2018-01-01
 ```
 
 Listing actions of actors
------------
+-------------------------
 The main purpose of CloudTracker is to look at the API calls made by actors (users and roles).  Let's assume `alice` has `SecurityAditor` privileges for her user which grants her the ability to `List` and `Describe` metadata for resources, plus the ability to `AsssumeRole` to the `admin` role.  We can see her actions:
 
 ```
@@ -130,7 +143,7 @@ Getting info for AssumeRole into admin
 In this example we can see that `charlie` has only ever created an S3 bucket as `admin`, so we may want to remove `charlie` from being able to assume this role or create another role that does not have the ability to create IAM users which we saw `alice` use.  This is the key feature of CloudTracker as identifying which users are actually making use of the roles they can assume into, and the actions they are using there, is difficult without a tool like CloudTracker.
 
 Working with multiple accounts
------------------
+------------------------------
 Amazon has advocated the use of multiple AWS accounts in much of their recent guidance.  This helps reduce the blast radius of incidents, among other benefits.  Once you start using multiple accounts though, you will find you may need to rethink how you are accessing all these accounts.  One way of working with multiple accounts will have users assuming roles into different accounts.  We can analyze the role assumptions of users into a different account the same way we did previously for a single account, except this time you need to ensure that you have CloudTrail logs from both accounts of interest are loaded into ElasticSearch.
 
 
@@ -145,7 +158,7 @@ In this example, we used the `--destaccount` option to specify the destination a
 
 
 Data files
-=============
+==========
 CloudTracker has two long text files that it uses to know what actions exist.
 
 aws_actions.txt
